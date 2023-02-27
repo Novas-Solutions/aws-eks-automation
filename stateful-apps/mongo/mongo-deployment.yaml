@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: mongodb-dev
+    app.kubernetes.io/name: mongodb
+  name: mongodb-dev
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mongodb
+      app.kubernetes.io/instance: mongodb-dev
+      app.kubernetes.io/name: mongodb
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: mongodb
+        app.kubernetes.io/instance: mongodb-dev
+        app.kubernetes.io/name: mongodb
+    spec:
+      containers:
+      - env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: MONGODB_ROOT_USER
+          value: root
+        - name: MONGODB_ROOT_PASSWORD
+          value: HTrCMof8f90
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "no"
+        - name: MONGODB_SYSTEM_LOG_VERBOSITY
+          value: "0"
+        - name: MONGODB_DISABLE_SYSTEM_LOG
+          value: "no"
+        - name: MONGODB_DISABLE_JAVASCRIPT
+          value: "no"
+        - name: MONGODB_ENABLE_JOURNAL
+          value: "yes"
+        - name: MONGODB_PORT_NUMBER
+          value: "27017"
+        - name: MONGODB_ENABLE_IPV6
+          value: "no"
+        - name: MONGODB_ENABLE_DIRECTORY_PER_DB
+          value: "no"
+        image: docker.io/bitnami/mongodb:5.0.9-debian-10-r11
+        imagePullPolicy: IfNotPresent
+        name: mongodb
+        ports:
+        - containerPort: 27017
+          name: mongodb
+          protocol: TCP
+        resources: {}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /bitnami/mongodb
+          name: datadir
+        - mountPath: /bitnami/scripts
+          name: common-scripts
+      volumes:
+      - configMap:
+          defaultMode: 360
+          name: mongodb-dev-common-scripts
+        name: common-scripts
+      - name: datadir
+        persistentVolumeClaim:
+          claimName: mongodb-dev
+
